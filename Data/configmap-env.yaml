@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: env-configmap
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+    ports:
+    - containerPort: 80
+    resources:
+      limits:
+        cpu: "0.2"
+        memory: "200Mi"
+      requests:
+        cpu: "0.1"
+        memory: "100Mi"
+    env:
+    - name: MYQL_ROOT_PASSWORD
+      value: test123
