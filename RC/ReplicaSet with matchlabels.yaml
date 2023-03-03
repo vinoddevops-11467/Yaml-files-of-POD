@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: replicaset-nginx-rs
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      name: temp-nginx
+      labels:
+        app: nginx
+        environment: production
+    spec:
+      volumes:
+      - name: shared-date-logs
+        hostPath:
+          type: DirectoryOrCreate
+          path: /nginx-data
+      initContainers:
+      - name: ubuntu-demo
+        image: ubuntu
+        command:
+          - "bin/sh"
+          - "-c"
+          - "echo welcome to init containers-demo"
+      containers:
+      - name: alpine
+        image: alpine
+        command: ["bin/sh"]
+        args: ["-c", "while true; do date >> /var/log/index.html; sleep 10;done"]
+        volumeMounts:
+        - name: shared-date-logs
+          mountPath: /var/log
+        resources:
+          limits:
+            cpu: "200m"
+            memory: "200Mi"
+          requests:
+            cpu: "100m"
+            memory: "100Mi"
+      - name: nginx
+        image: nginx:1.20.0
+        ports:
+         - containerPort: 80
+        env:
+          - name: MYSQL_ROOT_PASSWORD
+            value: "test123"
+          - name: DB_Name
+            value: "nginx"
+        volumeMounts:
+         - name: shared-date-logs
+           mountPath: /usr/share/nginx/html
+        resources:
+          limits:
+            cpu: "0.3"
+            memory: "300Mi"
+          requests:
+            cpu: "0.2"
+            memory: "200Mi"
